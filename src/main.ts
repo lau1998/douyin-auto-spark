@@ -1,6 +1,6 @@
 import 'dotenv/config'
 import { chromium, type Browser, type Cookie, type Locator, type Page } from 'playwright'
-import { mkdir, readFile } from 'node:fs/promises'
+import { mkdir } from 'node:fs/promises'
 import { createInterface } from 'node:readline/promises'
 import { stdin as input, stdout as output } from 'node:process'
 import dayjs from 'dayjs'
@@ -8,7 +8,7 @@ import 'dayjs/locale/zh-cn'
 import utc from 'dayjs/plugin/utc'
 import timezone from 'dayjs/plugin/timezone'
 import type { DouyinCookie, SameSite } from './types/douyin-cookie'
-import type { Yiyan } from './types/yiyan'
+import { NETEASE_CLOUD_COMMENT_API_URL, parseNetEaseCloudComments, type Yiyan } from './types/yiyan'
 
 dayjs.extend(utc)
 dayjs.extend(timezone)
@@ -641,17 +641,19 @@ function parseJson(value: string, sourceName: string): unknown {
 }
 
 /**
- * 解析一言数据列表。
+ * 从网易云热评接口获取可供发送的文案列表。
+ *
+ * @returns 经过格式校验的网易云热评列表。
+ * @throws 接口请求失败、响应状态异常或数据格式不正确时抛出错误。
  */
 async function resolveYiyans(): Promise<Yiyan[]> {
-  const yiyanText = await readFile('assets/yiyan.json', 'utf8')
-  const yiyans = JSON.parse(yiyanText) as Yiyan[]
+  const response = await fetch(NETEASE_CLOUD_COMMENT_API_URL)
 
-  if (!Array.isArray(yiyans) || yiyans.length === 0) {
-    throw new Error('assets/yiyan.json 必须是非空数组')
+  if (!response.ok) {
+    throw new Error(`网易云热评接口请求失败：HTTP ${response.status}`)
   }
 
-  return yiyans
+  return parseNetEaseCloudComments((await response.json()) as unknown)
 }
 
 /**

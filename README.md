@@ -18,14 +18,14 @@
 
 ## ✨ 项目简介
 
-本项目是一个基于 **Playwright + TypeScript** 的抖音自动续火脚本。它会携带你配置的抖音 Cookie 打开聊天页，按配置的会话名称依次定位聊天对象，并从 `assets/yiyan.json` 中随机挑选一言发送出去。支持 Github Actions 运行和本地运行两种方式。
+本项目是一个基于 **Playwright + TypeScript** 的抖音自动续火脚本。它会携带你配置的抖音 Cookie 打开聊天页，按配置的会话名称依次定位聊天对象，并从网易云热评接口获取文案发送出去。支持 Github Actions 运行和本地运行两种方式。
 
 ## 🚀 功能特性
 
 - 🎭 **Cookie 登录** - 通过 `DOUYIN_COOKIE` 注入抖音登录态，无需在脚本中输入账号密码
 - 🎯 **多会话发送** - 通过 `DOUYIN_TARGET_NAMES` 配置多个聊天对象
 - 👥 **多账号续火** - 支持同时为多个账号配置续火
-- 💬 **随机一言** - 每次从 `assets/yiyan.json` 随机挑选一条 `hitokoto`，默认以 `——「出处」` 的格式附上来源
+- 💬 **网易云热评** - 每次运行从网易云热评接口获取文案，默认以 `——「网易云音乐热评」` 的格式附上来源
 - 🤖 **定时续火** - 通过 Github Action 每天 0 点自动续火（但是 Github 定时任务要排队，可能会延迟几个小时）
 
 ## 🧰 准备工作
@@ -283,13 +283,13 @@ douyin-auto-spark/
 ├── .github/workflows/
 │   └── renew-fire.yml          # 🚀 GitHub Actions 定时续火任务
 ├── assets/
-│   ├── readme/                 # 🖼️ README 资源
-│   └── yiyan.json              # 📚 随机消息数据源
+│   └── readme/                 # 🖼️ README 资源
 ├── src/
 │   ├── main.ts                 # 🎭 Playwright 自动化入口
 │   └── types/
 │       ├── douyin-cookie.ts    # 🍪 抖音 Cookie 类型
-│       └── yiyan.ts            # 💬 一言数据类型
+│       ├── yiyan.test.ts       # 🧪 网易云热评数据解析测试
+│       └── yiyan.ts            # 💬 网易云热评数据类型与解析
 ├── .env.example                # ⚙️ 环境变量示例
 ├── .gitignore                  # 🙈 Git 忽略规则
 ├── .oxfmtrc.jsonc              # 🎨 oxfmt 配置
