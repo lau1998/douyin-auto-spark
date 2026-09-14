@@ -100,7 +100,7 @@ Settings -> Secrets and variables -> Actions -> New repository secret
 | `DOUYIN_COOKIE` | ✅ | Cookie-Editor 导出的完整 Cookie JSON 数组 |
 | `DOUYIN_TARGET_NAMES` | ✅ | 需要续火的好友名称 JSON 数组，例如 `["暮邵落白"]`，建议填写抖音备注名。不会写 JSON 的可以问下 AI |
 | `YIYAN_INCLUDE_SOURCE` | ❌ | 是否携带一言出处，默认开启；设置为 `false` 时只发送一言正文 |
-| `SPARK_MESSAGE_TEMPLATE` | ❌ | 自定义火花消息模板，见下方「✉️ 自定义消息模板」 |
+| `SPARK_MESSAGE_TEMPLATE` | ❌ | 自定义火花消息模板；设置为 `续火花` 时发送抖音内置表情，其他值见下方「✉️ 自定义消息模板」 |
 
 #### 3️⃣ 手动运行一次
 
@@ -141,7 +141,7 @@ cp .env.example .env
 | `DOUYIN_COOKIE` | ✅ | - | Cookie-Editor 导出的完整 Cookie JSON 数组 |
 | `DOUYIN_TARGET_NAMES` | ✅ | - | 要发送消息的好友名称 JSON 数组 |
 | `YIYAN_INCLUDE_SOURCE` | ❌ | `true` | 是否携带一言出处，设置为 `false` 时只发送一言正文 |
-| `SPARK_MESSAGE_TEMPLATE` | ❌ | - | 自定义火花消息模板，见下方「自定义消息模板」 |
+| `SPARK_MESSAGE_TEMPLATE` | ❌ | - | 自定义火花消息模板；设置为 `续火花` 时发送抖音内置表情，其他值见下方「自定义消息模板」 |
 | `PLAYWRIGHT_BROWSER_PATH` | ❌ | - | 本机 Chrome / Chromium / Edge 可执行文件路径，不填则使用 Playwright 默认浏览器 |
 | `PLAYWRIGHT_HEADLESS` | ❌ | `true` | 是否使用无头模式 |
 | `AUTO_CLOSE` | ❌ | `true` | 发送完成后是否自动关闭浏览器 |
@@ -246,6 +246,14 @@ DOUYIN_ACCOUNTS_3   第三批账号
 ## ✉️ 自定义消息模板
 
 配置 `SPARK_MESSAGE_TEMPLATE` 可定义所有账号共用的默认消息内容；账号对象中的 `messageTemplate` 可以覆盖它：
+
+如果希望发送抖音表情面板里的原生“续火花”表情，直接配置：
+
+```dotenv
+SPARK_MESSAGE_TEMPLATE=续火花
+```
+
+该配置会点击抖音表情面板中的“续火花”并直接发送；账号对象中的 `messageTemplate` 同样支持此写法。
 
 ```dotenv
 SPARK_MESSAGE_TEMPLATE={{friend}}，今天的火花到账啦🔥\n{{yiyan}}\n——「{{from}}」\n{{date}} {{weekday}}

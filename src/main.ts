@@ -20,6 +20,7 @@ const DOUYIN_COOKIE_KEY = 'DOUYIN_COOKIE'
 const DOUYIN_TARGET_NAMES_KEY = 'DOUYIN_TARGET_NAMES'
 const YIYAN_INCLUDE_SOURCE_KEY = 'YIYAN_INCLUDE_SOURCE'
 const SPARK_MESSAGE_TEMPLATE_KEY = 'SPARK_MESSAGE_TEMPLATE'
+const SPARK_EMOJI_LABEL = '续火花'
 const FAILURE_SCREENSHOT_DIRECTORY = 'artifacts'
 
 const CHAT_PAGE_READY_TIMEOUT = 30000
@@ -168,22 +169,26 @@ async function runDouyinAccount(
       await editorInput.waitFor({ state: 'visible', timeout: 10000 })
       await editorInput.click()
 
-      let message: string
-
-      if (account.messageTemplate !== undefined) {
-        message = renderMessageTemplate(
-          account.messageTemplate,
-          account.name,
-          targetName,
-          needsYiyan ? pickRandomYiyan(yiyans) : undefined,
-        )
+      if (account.messageTemplate !== undefined && isSparkEmojiTemplate(account.messageTemplate)) {
+        await sendSparkEmoji(page)
       } else {
-        const yiyan = pickRandomYiyan(yiyans)
-        message = includeYiyanSource ? `${yiyan.hitokoto}\n——「${yiyan.from}」` : yiyan.hitokoto
-      }
+        let message: string
 
-      await page.keyboard.insertText(message)
-      await page.keyboard.press('Enter')
+        if (account.messageTemplate !== undefined) {
+          message = renderMessageTemplate(
+            account.messageTemplate,
+            account.name,
+            targetName,
+            needsYiyan ? pickRandomYiyan(yiyans) : undefined,
+          )
+        } else {
+          const yiyan = pickRandomYiyan(yiyans)
+          message = includeYiyanSource ? `${yiyan.hitokoto}\n——「${yiyan.from}」` : yiyan.hitokoto
+        }
+
+        await page.keyboard.insertText(message)
+        await page.keyboard.press('Enter')
+      }
       console.log(`[${account.name}] 已发送消息：${targetName}`)
       await page.waitForTimeout(1000)
     }
@@ -405,6 +410,32 @@ function resolveSparkMessageTemplate(): string | undefined {
   }
 
   return normalizeMessageTemplate(template, SPARK_MESSAGE_TEMPLATE_KEY)
+}
+
+/**
+ * 判断消息模板是否要求发送抖音内置的“续火花”表情。
+ *
+ * @param template 已标准化的消息模板。
+ * @returns 模板是否对应“续火花”表情。
+ */
+function isSparkEmojiTemplate(template: string): boolean {
+  return template === SPARK_EMOJI_LABEL || template === `[${SPARK_EMOJI_LABEL}]`
+}
+
+/**
+ * 打开抖音表情面板并发送内置的“续火花”表情。
+ *
+ * @param page 当前抖音聊天页面。
+ */
+async function sendSparkEmoji(page: Page): Promise<void> {
+  // 抖音选择该表情后会直接发送，不能再额外按 Enter，避免重复发送。
+  await page.locator('.messageMsgInputiconAction').first().click({ timeout: 5000 })
+
+  const sparkEmojiItem = page
+    .locator('.emojiEmojiItememojiItem')
+    .filter({ hasText: SPARK_EMOJI_LABEL })
+  await sparkEmojiItem.waitFor({ state: 'visible', timeout: 5000 })
+  await sparkEmojiItem.click({ timeout: 5000 })
 }
 
 /**
